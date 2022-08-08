@@ -1,4 +1,4 @@
-import { Grid, Button, Text, Spacer } from "@nextui-org/react";
+import { Grid, Button, Text, Spacer, Loading, Modal } from "@nextui-org/react";
 import { useTheme as useNextTheme } from "next-themes";
 import { Switch } from "@nextui-org/react";
 import React from "react";
@@ -7,6 +7,7 @@ type Row = {
   id: string;
   value: number;
   clicked: boolean;
+  group: string;
 };
 
 const Ticket = () => {
@@ -15,9 +16,18 @@ const Ticket = () => {
     []
   );
   const [data, setData] = React.useState<Array<Row>>([]);
-  const [isLoading, setIsLoading] = React.useState(true);
-  const [selectedValues, setSelectedValues] = React.useState([""]);
-  const [isDark] = React.useState(true);
+  const [isLoading, setIsLoading] = React.useState<boolean>(true);
+  const [selectedValues, setSelectedValues] = React.useState<Array<string>>([
+    "",
+  ]);
+  const [isDark] = React.useState<boolean>(true);
+  const [successMessage, setSuccessMessage] = React.useState<String>("");
+  const [visible, setVisible] = React.useState(false);
+  const [result, setResult] = React.useState<Array<unknown>>([]);
+  const closeHandler = () => {
+    window.location.reload();
+    setVisible(false);
+  };
 
   const generateValues = (item: Array<Row>) => {
     let container: Array<React.ReactElement> = [];
@@ -58,7 +68,7 @@ const Ticket = () => {
     setRow1Value(gridContainerArray);
   };
 
-  const gridContainer = (item: any, id: string) => {
+  const gridContainer = (item: unknown, id: string) => {
     return (
       <Grid xs={3} justify="center" direction="column" key={id}>
         {item}
@@ -104,6 +114,7 @@ const Ticket = () => {
           id: `row${row}-${counter}`,
           value: counter,
           clicked: false,
+          group: `row${row}`,
         };
         container.push(item);
       }
@@ -137,12 +148,23 @@ const Ticket = () => {
   }, [row1Value]);
 
   const handleOnClick = (item: Row) => {
-    item.clicked = !item.clicked;
-    setData([...data, item]);
-    setSelectedValues([
-      ...selectedValues,
-      !item.clicked ? "" : item.value.toLocaleString(),
-    ]);
+    data.map((value) => {
+      if (value.group == item.group) {
+        if (value.id == item.id) {
+          value.clicked = true;
+        } else {
+          value.clicked = false;
+        }
+      }
+    });
+    setData([...data]);
+    const arrContainer: Array<string> = [];
+    const clickedValues = data
+      .filter((item) => item.clicked)
+      .map((mappedValue) =>
+        arrContainer.push(mappedValue.value.toLocaleString())
+      );
+    setSelectedValues(arrContainer);
   };
 
   function getRandomIntInclusive(min: number, max: number) {
@@ -153,12 +175,46 @@ const Ticket = () => {
 
   const handleSubmit = () => {
     const counter = 4;
-    const winningNumber = [];
-    
+    const winningNumber: Array<unknown> = [];
+    let messageCounter = 0;
+    const message = [
+      "Calculating results...",
+      "Waiting for Ed Caluag's blessings...",
+      "Creating Bugs for future development...",
+      "1+1 = 30. fkkk im bad at math at least fast...",
+      "Calculating time spent development...",
+      "8 hrs because im noob :(",
+    ];
+
     for (let index = 0; index < counter; index++) {
       winningNumber.push(getRandomIntInclusive(1, 9));
     }
-    console.log(winningNumber);
+
+    setIsLoading(true);
+    const timer = setInterval(() => {
+      setSuccessMessage(message[messageCounter]);
+      if (messageCounter == 6) {
+        callbackTimer();
+        setVisible(true);
+        setResult(winningNumber);
+      }
+      messageCounter++;
+    }, 800);
+
+    const callbackTimer = () => {
+      clearInterval(timer);
+      setIsLoading(false);
+    };
+  };
+
+  const calculateResults = () => {
+    const finalResult = result.join("") as unknown;
+
+    if (selectedValues == finalResult) {
+      return "Congratulations! Buy lotto now!!!";
+    } else {
+      return "Try again tomorrow or not";
+    }
   };
 
   return (
@@ -206,14 +262,51 @@ const Ticket = () => {
             {row1Value}
           </Grid.Container>
           <Grid.Container xs={12} justify="center" gap={2}>
-            {selectedValues.length == 5 && (
+            {selectedValues.length == 4 && (
               <Button color="error" size="xl" onClick={handleSubmit}>
-                SUBMIT
+                Submit
               </Button>
             )}
           </Grid.Container>
         </Grid.Container>
       )}
+      {isLoading && (
+        <Grid.Container
+          justify="center"
+          direction="column"
+          css={{ paddingTop: "50vh" }}
+        >
+          <Loading size="xl" />
+          <Text css={{ textAlign: "center" }}>{successMessage}</Text>
+        </Grid.Container>
+      )}
+      <>
+        {visible && (
+          <Modal
+            closeButton
+            blur
+            aria-labelledby="modal-title"
+            open={visible}
+            onClose={closeHandler}
+          >
+            <Modal.Header>
+              <Text id="modal-title" h2>
+                Result:
+              </Text>
+            </Modal.Header>
+            <Modal.Body>
+              <Text h4>Game winning numbers are: {result.join("")}</Text>
+              <Text h4>Your numbers are: {selectedValues}</Text>
+              <Text h3 color="warning">{calculateResults()}</Text>
+            </Modal.Body>
+            <Modal.Footer>
+              <Button auto flat color="primary" onClick={closeHandler}>
+                Close
+              </Button>
+            </Modal.Footer>
+          </Modal>
+        )}
+      </>
     </>
   );
 };
