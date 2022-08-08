@@ -70,7 +70,15 @@ const Ticket = () => {
 
   const gridContainer = (item: any, id: string) => {
     return (
-      <Grid xs={3} justify="center" direction="column" key={id}>
+      <Grid
+        xs={12}
+        lg={3}
+        md={3}
+        sm={3}
+        justify="center"
+        direction="column"
+        key={id}
+      >
         {item}
       </Grid>
     );
@@ -297,7 +305,9 @@ const Ticket = () => {
             <Modal.Body>
               <Text h4>Game winning numbers are: {result.join("")}</Text>
               <Text h4>Your numbers are: {selectedValues}</Text>
-              <Text h3 color="warning">{calculateResults()}</Text>
+              <Text h3 color="warning">
+                {calculateResults()}
+              </Text>
             </Modal.Body>
             <Modal.Footer>
               <Button auto flat color="primary" onClick={closeHandler}>
