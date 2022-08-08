@@ -68,7 +68,7 @@ const Ticket = () => {
     setRow1Value(gridContainerArray);
   };
 
-  const gridContainer = (item: unknown, id: string) => {
+  const gridContainer = (item: any, id: string) => {
     return (
       <Grid xs={3} justify="center" direction="column" key={id}>
         {item}
