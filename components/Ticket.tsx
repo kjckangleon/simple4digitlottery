@@ -71,7 +71,7 @@ const Ticket = () => {
   const gridContainer = (item: any, id: string) => {
     return (
       <Grid
-        xs={12}
+        xs={3}
         lg={3}
         md={3}
         sm={3}
@@ -89,7 +89,7 @@ const Ticket = () => {
       <div key={item.id}>
         <Button
           bordered={!item.clicked}
-          size="lg"
+          size={"lg"}
           id={item.id}
           color={
             item.id.includes("row1")
@@ -195,7 +195,7 @@ const Ticket = () => {
     ];
 
     for (let index = 0; index < counter; index++) {
-      winningNumber.push(getRandomIntInclusive(1, 9));
+      winningNumber.push(getRandomIntInclusive(1, 8));
     }
 
     setIsLoading(true);
